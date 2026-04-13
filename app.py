@@ -6,7 +6,21 @@ import yfinance as yf
 st.set_page_config(page_title="股票投資系統", layout="wide")
 
 FILE = "transactions.csv"
+
+import os
+import pandas as pd
+
+FILE = "transactions.csv"
+
+if not os.path.exists(FILE):
+    df = pd.DataFrame(columns=[
+        "date", "stock_id", "stock_name",
+        "type", "price", "quantity", "note"
+    ])
+    df.to_csv(FILE, index=False)
+
 df = pd.read_csv(FILE, dtype={"stock_id": str})
+
 
 df["amount"] = df["price"] * df["quantity"]
 
