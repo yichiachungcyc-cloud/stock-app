@@ -126,9 +126,13 @@ with tab_analysis:
 
     result_df = pd.DataFrame(result)
 
+    if result_df.empty:
+        st.warning("目前沒有任何交易資料")
+        st.stop()
+
     # 即時價格
     prices = []
-    for sid in result_df["stock_id"]:
+    for sid in result_df.get("stock_id", []):
         try:
             price = yf.Ticker(f"{sid}.TW").history(period="1d")["Close"].iloc[-1]
         except:
