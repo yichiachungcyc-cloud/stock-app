@@ -43,7 +43,7 @@ sheet = client.open_by_key("11CNAKad0xqBCMqdgQeco2J-OY-tUkbmKdJlZ63iaPEk").sheet
 data = sheet.get_all_records()
 df = pd.DataFrame(data)
 
-df.columns = df.columns.str.strip()  # ⭐ 加這行(去空白)
+df.columns = [str(c).strip() for c in df.columns]  # ⭐ 加這行(去空白)
 
 df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
 
