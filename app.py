@@ -125,12 +125,6 @@ with tab_main:
 
     st.subheader("🧾 交易明細")
 
-    if "edit_mode" not in st.session_state:
-        st.session_state.edit_mode = False
-
-    if st.button("✏️ 編輯模式"):
-        st.session_state.edit_mode = not st.session_state.edit_mode
-
     selected_month = st.selectbox(
         "選擇月份",
         options=["全部"] + sorted(df["month"].dropna().unique().tolist())
@@ -141,43 +135,28 @@ with tab_main:
     else:
         filtered_df = df.copy()
 
-    if not st.session_state.edit_mode:
-        st.dataframe(
-            filtered_df.style.map(highlight_type, subset=["type"]),
-            use_container_width=True
-        )
-    else:
-        edited_df = st.data_editor(
-            filtered_df,
-            num_rows="dynamic",
-            use_container_width=True,
-            column_config={
-                "note": st.column_config.TextColumn("備註", width="large")
-            }
-        )
+    edited_df = st.data_editor(
+        filtered_df,
+        num_rows="dynamic",
+        use_container_width=True,
+        column_config={
+            "note": st.column_config.TextColumn("備註", width="large")
+        }
+    )
 
-    st.subheader("➕ 新增記帳")
+    if st.button("💾 儲存修改到 Google Sheet"):
 
-    date = st.date_input("日期")
-    stock_id = st.text_input("股票代號")
-    stock_name = st.text_input("股票名稱")
-    type_ = st.selectbox("類型", ["BUY", "SELL"])
-    price = st.number_input("價格", min_value=0.0)
-    quantity = st.number_input("數量", min_value=0, step=1)
-    note = st.text_input("備註")
+        # 🔥 安全轉型（避免 JSON error）
+        safe_df = edited_df.copy().fillna("")
 
-    if st.button("💾 新增這筆交易"):
-        sheet.append_row([
-            str(date),
-            stock_id,
-            stock_name,
-            type_,
-            price,
-            quantity,
-            note
-        ])
+        # 全部轉字串（避免 gspread 爆 type）
+        values = [safe_df.columns.tolist()] + safe_df.astype(str).values.tolist()
 
-        st.success("已新增，不會覆蓋舊資料")
+        # ⚠️ 不用 clear（避免你資料消失）
+        sheet.resize(rows=len(values))  # 可選：避免殘留舊資料
+        sheet.update(values)
+
+        st.success("已安全更新 Google Sheet")
         st.rerun()
 
 # =========================
