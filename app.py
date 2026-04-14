@@ -125,6 +125,18 @@ with tab_main:
 
     st.subheader("🧾 交易明細")
 
+    # =========================
+    # 模式切換
+    # =========================
+    mode = st.radio(
+        "模式",
+        ["👀 檢視模式", "🧪 試算模式（不會存）", "💾 編輯並存檔"],
+        horizontal=True
+    )
+
+    # =========================
+    # 篩選
+    # =========================
     selected_month = st.selectbox(
         "選擇月份",
         options=["全部"] + sorted(df["month"].dropna().unique().tolist())
@@ -135,29 +147,52 @@ with tab_main:
     else:
         filtered_df = df.copy()
 
-    edited_df = st.data_editor(
-        filtered_df,
-        num_rows="dynamic",
-        use_container_width=True,
-        column_config={
-            "note": st.column_config.TextColumn("備註", width="large")
-        }
-    )
+    # =========================
+    # 👀 檢視模式
+    # =========================
+    if mode == "👀 檢視模式":
 
-    if st.button("💾 儲存修改到 Google Sheet"):
+        st.dataframe(
+            filtered_df,
+            use_container_width=True
+        )
 
-        # 🔥 安全轉型（避免 JSON error）
-        safe_df = edited_df.copy().fillna("")
+    # =========================
+    # 🧪 試算模式（不存）
+    # =========================
+    elif mode == "🧪 試算模式（不會存）":
 
-        # 全部轉字串（避免 gspread 爆 type）
-        values = [safe_df.columns.tolist()] + safe_df.astype(str).values.tolist()
+        edited_df = st.data_editor(
+            filtered_df,
+            num_rows="dynamic",
+            use_container_width=True
+        )
 
-        # ⚠️ 不用 clear（避免你資料消失）
-        sheet.resize(rows=len(values))  # 可選：避免殘留舊資料
-        sheet.update(values)
+        st.info("這是試算模式，關閉或刷新後資料會消失")
 
-        st.success("已安全更新 Google Sheet")
-        st.rerun()
+    # =========================
+    # 💾 編輯並存檔
+    # =========================
+    elif mode == "💾 編輯並存檔":
+
+        edited_df = st.data_editor(  
+            filtered_df,
+            num_rows="dynamic",
+            use_container_width=True
+        )
+
+        if st.button("💾 確認寫回 Google Sheet"):
+
+            safe_df = edited_df.copy().fillna("")
+
+            values = [safe_df.columns.tolist()] + safe_df.astype(str).values.tolist()
+
+            # ✅ 安全寫回（不 clear）
+            sheet.resize(rows=len(values))
+            sheet.update(values)
+
+            st.success("已安全存回 Google Sheet")
+            st.rerun()
 
 # =========================
 # 📈 投資分析
