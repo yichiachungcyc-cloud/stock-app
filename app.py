@@ -28,8 +28,11 @@ if not os.path.exists(FILE):
 
 df = pd.read_csv(FILE, dtype={"stock_id": str})
 
+# ===== 數據格式統一 =====
+df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
+df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
+df["amount"] = (df["price"] * df["quantity"]).round(3)
 
-df["amount"] = df["price"] * df["quantity"]
 
 if "note" not in df.columns:
     df["note"] = ""
@@ -37,8 +40,6 @@ if "note" not in df.columns:
 df["note"] = df["note"].fillna("").astype(str)
 
 # ===== 確保欄位 =====
-
-df["amount"] = df["price"] * df["quantity"]
 
 if "note" not in df.columns:
     df["note"] = ""
@@ -111,7 +112,7 @@ with tab_main:
 with tab_analysis:
     st.title("📈 投資分析")
 
-    df["amount"] = df["price"] * df["quantity"]
+    df["amount"] = (df["price"] * df["quantity"]).round(3)
     grouped = df.groupby("stock_id")
 
     result = []
@@ -152,15 +153,29 @@ with tab_analysis:
 
     result_df["current_price"] = prices
 
-    # 損益
-    result_df["profit"] = (result_df["current_price"] - result_df["avg_cost"]) * result_df["shares"]
+    # 先算 profit
+    result_df["profit"] = (result_df["current_price"] - result_df["avg_cost"]) *       result_df["shares"]
+
+    # 再 round
+    result_df["avg_cost"] = result_df["avg_cost"].round(3)
+    result_df["current_price"] = result_df["current_price"].round(3)
+    result_df["profit"] = result_df["profit"].round(3)
 
     # KPI
     total_profit = result_df["profit"].sum()
     st.metric("💰 總損益", f"{total_profit:,.0f}")
 
     # 表格
-    st.dataframe(result_df)
+    st.dataframe(
+        result_df,
+        column_config={
+            "avg_cost": st.column_config.NumberColumn(format="%.3f"),
+            "current_price": st.column_config.NumberColumn(format="%.3f"),
+            "profit": st.column_config.NumberColumn(format="%.3f"),
+            "shares": st.column_config.NumberColumn(format="%.0f"),
+        },
+        use_container_width=True
+    )
 
     # 圖表
     st.subheader("📈 損益圖")
