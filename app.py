@@ -41,7 +41,18 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key("11CNAKad0xqBCMqdgQeco2J-OY-tUkbmKdJlZ63iaPEk").sheet1
 
 data = sheet.get_all_records()
-df = pd.DataFrame(data[1:], columns=data[0])
+data = sheet.get_all_values()
+
+if len(data) == 0:
+    st.error("Google Sheet 是空的")
+    st.stop()
+
+if len(data) == 1:
+    st.warning("只有欄位沒有資料")
+    df = pd.DataFrame(columns=data[0])
+else:
+    df = pd.DataFrame(data[1:], columns=data[0])
+
 
 df.columns = [str(c).strip().lower() for c in df.columns]  # ⭐ 加這行(去空白)
 
