@@ -26,7 +26,22 @@ if not os.path.exists(FILE):
     ])
     df.to_csv(FILE, index=False)
 
-df = pd.read_csv(FILE, dtype={"stock_id": str})
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+scope = ["https://spreadsheets.google.com/feeds",
+         "https://www.googleapis.com/auth/drive"]
+
+creds = ServiceAccountCredentials.from_json_keyfile_dict(
+    st.secrets["gcp_service_account"], scope
+)
+
+client = gspread.authorize(creds)
+
+sheet = client.open_by_key("你的SheetID").sheet1
+
+data = sheet.get_all_records()
+df = pd.DataFrame(data)
 
 # ===== 數據格式統一 =====
 df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
@@ -103,7 +118,8 @@ with tab_main:
         )
 
         if st.button("💾 儲存修改"):
-            edited_df.to_csv(FILE, index=False)
+            sheet.clear()
+            sheet.update([edited_df.columns.values.tolist()] + edited_df.values.tolist())
             st.success("已儲存")
 
 # =========================
