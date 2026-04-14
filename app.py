@@ -155,9 +155,10 @@ with tab_main:
 
         if st.button("💾 儲存修改"):
             sheet.clear()
+
             sheet.update(
                 [edited_df.columns.tolist()] +
-                edited_df.fillna("").values.tolist()
+                edited_df.fillna("").astype(str).values.tolist()
             )
             st.success("已儲存")
 
