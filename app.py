@@ -149,6 +149,7 @@ with tab_analysis:
     st.title("📈 投資分析")
 
     df["amount"] = (df["price"] * df["quantity"]).round(3)
+
     grouped = df.groupby("stock_id")
 
     result = []
@@ -169,7 +170,7 @@ with tab_analysis:
             "stock_id": stock_id,
             "stock_name": stock_name,
             "shares": shares,
-            "avg_cost": avg_cost
+            "avg_cost": round(avg_cost, 3)
         })
 
     result_df = pd.DataFrame(result)
@@ -180,33 +181,23 @@ with tab_analysis:
 
     # 即時價格
     prices = []
-    for sid in result_df.get("stock_id", []):
+    for sid in result_df["stock_id"]:
         try:
             price = yf.Ticker(f"{sid}.TW").history(period="1d")["Close"].iloc[-1]
         except:
-            price = None
+            price = 0
         prices.append(price)
 
     result_df["current_price"] = prices
-    result_df["current_price"] = result_df["current_price"].fillna(0)
 
+    # ⭐ profit（只算一次！）
     result_df["profit"] = (
         (result_df["current_price"] - result_df["avg_cost"]) * result_df["shares"]
     ).round(3)
 
-    # 先算 profit
-    result_df["profit"] = (result_df["current_price"] - result_df["avg_cost"]) *       result_df["shares"]
-
-    # 再 round
-    result_df["avg_cost"] = result_df["avg_cost"].round(3)
-    result_df["current_price"] = result_df["current_price"].round(3)
-    result_df["profit"] = result_df["profit"].round(3)
-
-    # KPI
     total_profit = result_df["profit"].sum()
     st.metric("💰 總損益", f"{total_profit:,.0f}")
 
-    # 表格
     st.dataframe(
         result_df,
         column_config={
@@ -218,6 +209,5 @@ with tab_analysis:
         use_container_width=True
     )
 
-    # 圖表
     st.subheader("📈 損益圖")
     st.bar_chart(result_df.set_index("stock_id")["profit"])
