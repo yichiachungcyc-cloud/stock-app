@@ -1,7 +1,7 @@
 import streamlit as st
 
 USER_DB = {
-    "admin": "1234",
+    "ikea": "1234",
     "user1": "5678"
 }
 
