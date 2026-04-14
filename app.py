@@ -38,7 +38,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_dict(
 
 client = gspread.authorize(creds)
 
-sheet = client.open_by_key("你的SheetID").sheet1
+sheet = client.open_by_key("11CNAKad0xqBCMqdgQeco2J-OY-tUkbmKdJlZ63iaPEk").sheet1
 
 data = sheet.get_all_records()
 df = pd.DataFrame(data)
