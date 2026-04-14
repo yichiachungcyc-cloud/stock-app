@@ -64,7 +64,7 @@ for col in required_cols:
 
 # ===== 數據格式統一 =====
 df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0).round(3)
-df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
+df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(float).astype(int)
 df["amount"] = (df["price"] * df["quantity"]).round(3)
 
 if "note" not in df.columns:
