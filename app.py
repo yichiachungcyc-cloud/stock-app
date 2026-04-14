@@ -157,18 +157,7 @@ with tab_main:
             use_container_width=True
         )
 
-    # =========================
-    # 🧪 試算模式（不存）
-    # =========================
-    elif mode == "🧪 試算模式（不會存）":
-
-        edited_df = st.data_editor(
-            filtered_df,
-            num_rows="dynamic",
-            use_container_width=True
-        )
-
-        st.info("這是試算模式，關閉或刷新後資料會消失")
+   
 
     # =========================
     # 💾 編輯並存檔
