@@ -86,7 +86,7 @@ with tab_main:
         filtered_df = df.copy()
 
     if not st.session_state.edit_mode:
-        styled_df = filtered_df.style.applymap(
+        styled_df = filtered_df.style.map(
             highlight_type,
             subset=["type"]
         )
