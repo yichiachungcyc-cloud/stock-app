@@ -3,6 +3,13 @@ import pandas as pd
 from datetime import date
 import yfinance as yf
 
+def highlight_type(val):
+    if val == "BUY":
+        return "color: green; font-weight: bold;"
+    elif val == "SELL":
+        return "color: red; font-weight: bold;"
+    return ""
+
 st.set_page_config(page_title="股票投資系統", layout="wide")
 
 FILE = "transactions.csv"
@@ -79,7 +86,11 @@ with tab_main:
         filtered_df = df.copy()
 
     if not st.session_state.edit_mode:
-        st.dataframe(filtered_df, use_container_width=True)
+        styled_df = filtered_df.style.applymap(
+            highlight_type,
+            subset=["type"]
+        )
+        st.dataframe(styled_df, use_container_width=True)
     else:
         edited_df = st.data_editor(
             filtered_df,
