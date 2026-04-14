@@ -156,19 +156,29 @@ with tab_main:
             }
         )
 
-        if st.button("💾 新增這筆交易"):
-            sheet.append_row([
-                str(date),
-                stock_id,
-                stock_name,
-                type_,
-                price,
-                quantity,
-                note
-            ])
+    st.subheader("➕ 新增記帳")
 
-            st.success("已新增，不會覆蓋舊資料")
-            st.rerun()
+    date = st.date_input("日期")
+    stock_id = st.text_input("股票代號")
+    stock_name = st.text_input("股票名稱")
+    type_ = st.selectbox("類型", ["BUY", "SELL"])
+    price = st.number_input("價格", min_value=0.0)
+    quantity = st.number_input("數量", min_value=0, step=1)
+    note = st.text_input("備註")
+
+    if st.button("💾 新增這筆交易"):
+        sheet.append_row([
+            str(date),
+            stock_id,
+            stock_name,
+            type_,
+            price,
+            quantity,
+            note
+        ])
+
+        st.success("已新增，不會覆蓋舊資料")
+        st.rerun()
 
 # =========================
 # 📈 投資分析
