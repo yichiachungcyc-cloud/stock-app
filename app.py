@@ -120,6 +120,9 @@ with tab_main:
     col2.metric("💸 總賣出", f"{total_sell:,.0f}")
 
     st.divider()
+
+    
+
     st.subheader("🧾 交易明細")
 
     if "edit_mode" not in st.session_state:
@@ -153,14 +156,19 @@ with tab_main:
             }
         )
 
-        if st.button("💾 儲存修改"):
-            sheet.clear()
+        if st.button("💾 新增這筆交易"):
+            sheet.append_row([
+                str(date),
+                stock_id,
+                stock_name,
+                type_,
+                price,
+                quantity,
+                note
+            ])
 
-            sheet.update(
-                [edited_df.columns.tolist()] +
-                edited_df.fillna("").astype(str).values.tolist()
-            )
-            st.success("已儲存")
+            st.success("已新增，不會覆蓋舊資料")
+            st.rerun()
 
 # =========================
 # 📈 投資分析
