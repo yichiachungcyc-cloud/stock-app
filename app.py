@@ -41,7 +41,8 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key("11CNAKad0xqBCMqdgQeco2J-OY-tUkbmKdJlZ63iaPEk").sheet1
 
 data = sheet.get_all_records()
-data = sheet.get_all_values()
+
+df = pd.DataFrame(data)
 
 if len(data) == 0:
     st.error("Google Sheet 是空的")
