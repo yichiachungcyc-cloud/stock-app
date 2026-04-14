@@ -41,17 +41,20 @@ client = gspread.authorize(creds)
 sheet = client.open_by_key("11CNAKad0xqBCMqdgQeco2J-OY-tUkbmKdJlZ63iaPEk").sheet1
 
 data = sheet.get_all_records()
-df = pd.DataFrame(data)
+df = pd.DataFrame(data[1:], columns=data[0])
 
-df.columns = [str(c).strip() for c in df.columns]  # ⭐ 加這行(去空白)
+df.columns = [str(c).strip().lower() for c in df.columns]  # ⭐ 加這行(去空白)
 
-df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
+required_cols = ["date","stock_id","stock_name","type","price","quantity","note"]
+
+for col in required_cols:
+    if col not in df.columns:
+        df[col] = ""
 
 # ===== 數據格式統一 =====
-df["price"] = pd.to_numeric(df["price"], errors="coerce").round(3)
+df["price"] = pd.to_numeric(df["price"], errors="coerce").fillna(0).round(3)
 df["quantity"] = pd.to_numeric(df["quantity"], errors="coerce").fillna(0).astype(int)
 df["amount"] = (df["price"] * df["quantity"]).round(3)
-
 
 if "note" not in df.columns:
     df["note"] = ""
@@ -123,7 +126,9 @@ with tab_main:
 
         if st.button("💾 儲存修改"):
             sheet.clear()
-            sheet.update([edited_df.columns.values.tolist()] + edited_df.values.tolist())
+            sheet.update(
+                [edited_df.columns.tolist()] + edited_df.fillna("").values.tolist()
+            )
             st.success("已儲存")
 
 # =========================
@@ -172,6 +177,11 @@ with tab_analysis:
         prices.append(price)
 
     result_df["current_price"] = prices
+    result_df["current_price"] = result_df["current_price"].fillna(0)
+
+    result_df["profit"] = (
+        (result_df["current_price"] - result_df["avg_cost"]) * result_df["shares"]
+    ).round(3)
 
     # 先算 profit
     result_df["profit"] = (result_df["current_price"] - result_df["avg_cost"]) *       result_df["shares"]
