@@ -1,4 +1,30 @@
 import streamlit as st
+
+USER_DB = {
+    "admin": "1234",
+    "user1": "5678"
+}
+
+if "login" not in st.session_state:
+    st.session_state.login = False
+
+if not st.session_state.login:
+    st.title("🔐 登入系統")
+
+    username = st.text_input("帳號")
+    password = st.text_input("密碼", type="password")
+
+    if st.button("登入"):
+        if username in USER_DB and USER_DB[username] == password:
+            st.session_state.login = True
+            st.session_state.user = username
+            st.rerun()
+        else:
+            st.error("帳號或密碼錯誤")
+
+    st.stop()
+st.sidebar.success(f"登入者：{st.session_state.user}")
+
 import pandas as pd
 import yfinance as yf
 import gspread
