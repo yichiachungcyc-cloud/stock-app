@@ -11,12 +11,12 @@ if not st.session_state.login:
     username = st.text_input("帳號")
     password = st.text_input("密碼", type="password")
 
-     if st.button("登入"):
-        if username in users and users[username] == password:
+    if st.button("登入"):
+       if username in users and users[username] == password:
             st.session_state.login = True
             st.session_state.user = username
             st.rerun()
-        else:
+       else:
             st.error("帳密錯誤")
 
     st.stop()
