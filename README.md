@@ -79,7 +79,7 @@ It demonstrates the ability to build a complete data-driven application, includi
 
 ---
 ## 📸 Demo
-![App Screenshot](screenshot.png)
+![App Screenshot](screenshot1.png)(screenshot2.png)
 
 ---
 ## 📦 Installation & Run
