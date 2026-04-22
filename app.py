@@ -207,7 +207,7 @@ for stock_id, group in df.sort_values("date").groupby("stock_id"):
             shares -= row["quantity"]
             cost -= avg_cost * row["quantity"]
 
-        # ⭐ 清倉重置
+        # ⭐ 清倉歸零
         if shares == 0:
             cost = 0
 
