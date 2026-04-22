@@ -184,59 +184,39 @@ with tab_main:
             st.rerun()
 
 # =========================
-# 📈 投資分析
+# 📈 投資分析（正確版）
 # =========================
 with tab_analysis:
     st.title("📈 投資分析")
 
     result = []
 
-for stock_id, group in df.sort_values("date").groupby("stock_id"):
+    # ⭐ 正確寫法（排序 + groupby）
+    for stock_id, group in df.sort_values("date").groupby("stock_id"):
 
-    shares = 0
-    cost = 0
+        shares = 0
+        cost = 0
 
-    for _, row in group.iterrows():
+        for _, row in group.iterrows():
 
-        if row["type"] == "BUY":
-            shares += row["quantity"]
-            cost += row["price"] * row["quantity"]
+            if row["type"] == "BUY":
+                shares += row["quantity"]
+                cost += row["price"] * row["quantity"]
 
-        elif row["type"] == "SELL" and shares > 0:
-            avg_cost = cost / shares if shares != 0 else 0
-            shares -= row["quantity"]
-            cost -= avg_cost * row["quantity"]
+            elif row["type"] == "SELL" and shares > 0:
+                avg_cost = cost / shares if shares != 0 else 0
+                shares -= row["quantity"]
+                cost -= avg_cost * row["quantity"]
 
-        # ⭐ 清倉歸零
-        if shares == 0:
-            cost = 0
+            # ⭐ 清倉歸零（超重要）
+            if shares == 0:
+                cost = 0
 
-    avg_cost = cost / shares if shares != 0 else 0
-
-    result.append({
-        "stock_id": stock_id,
-        "stock_name": group["stock_name"].iloc[0],
-        "shares": shares,
-        "avg_cost": round(avg_cost, 3)
-    })
-
-    result = []
-
-    for stock_id, group in grouped:
-        buy_df = group[group["type"] == "BUY"]
-        sell_df = group[group["type"] == "SELL"]
-
-        shares = buy_df["quantity"].sum() - sell_df["quantity"].sum()
-        cost = buy_df["amount"].sum()
-        buy_shares = buy_df["quantity"].sum()
-
-        avg_cost = cost / buy_shares if buy_shares != 0 else 0
-
-        stock_name = group["stock_name"].iloc[0]
+        avg_cost = cost / shares if shares != 0 else 0
 
         result.append({
             "stock_id": stock_id,
-            "stock_name": stock_name,
+            "stock_name": group["stock_name"].iloc[0],
             "shares": shares,
             "avg_cost": round(avg_cost, 3)
         })
@@ -247,7 +227,9 @@ for stock_id, group in df.sort_values("date").groupby("stock_id"):
         st.warning("目前沒有任何交易資料")
         st.stop()
 
+    # =========================
     # 即時價格
+    # =========================
     prices = []
     for sid in result_df["stock_id"]:
         try:
@@ -258,15 +240,21 @@ for stock_id, group in df.sort_values("date").groupby("stock_id"):
 
     result_df["current_price"] = prices
 
-    # profit（只算一次）
+    # =========================
+    # 損益
+    # =========================
     result_df["profit"] = (
         (result_df["current_price"] - result_df["avg_cost"])
         * result_df["shares"]
     ).round(3)
 
     total_profit = result_df["profit"].sum()
+
     st.metric("💰 總損益", f"{total_profit:,.0f}")
 
+    # =========================
+    # 表格
+    # =========================
     st.dataframe(
         result_df,
         column_config={
@@ -278,5 +266,8 @@ for stock_id, group in df.sort_values("date").groupby("stock_id"):
         use_container_width=True
     )
 
+    # =========================
+    # 圖表
+    # =========================
     st.subheader("📈 損益圖")
     st.bar_chart(result_df.set_index("stock_id")["profit"])
