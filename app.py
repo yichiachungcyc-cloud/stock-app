@@ -189,7 +189,36 @@ with tab_main:
 with tab_analysis:
     st.title("📈 投資分析")
 
-    grouped = df.groupby("stock_id")
+    result = []
+
+for stock_id, group in df.sort_values("date").groupby("stock_id"):
+
+    shares = 0
+    cost = 0
+
+    for _, row in group.iterrows():
+
+        if row["type"] == "BUY":
+            shares += row["quantity"]
+            cost += row["price"] * row["quantity"]
+
+        elif row["type"] == "SELL" and shares > 0:
+            avg_cost = cost / shares if shares != 0 else 0
+            shares -= row["quantity"]
+            cost -= avg_cost * row["quantity"]
+
+        # ⭐ 清倉重置
+        if shares == 0:
+            cost = 0
+
+    avg_cost = cost / shares if shares != 0 else 0
+
+    result.append({
+        "stock_id": stock_id,
+        "stock_name": group["stock_name"].iloc[0],
+        "shares": shares,
+        "avg_cost": round(avg_cost, 3)
+    })
 
     result = []
 
