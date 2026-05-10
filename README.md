@@ -79,7 +79,8 @@ It demonstrates the ability to build a complete data-driven application, includi
 
 ---
 ## 📸 Demo
-![App Screenshot](screenshot1.png)(screenshot2.png)
+![Dashboard View](screenshot1.png)
+![Mobile View](screenshot2.png)
 
 ---
 ## 📦 Installation & Run
